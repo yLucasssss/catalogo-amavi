@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ debug: true });
 console.log('DOTENV loaded.');
 console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
 console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Loaded' : 'Not Loaded');
@@ -23,6 +23,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 console.log('Cloudinary configured.');
+
+// Global error handlers to catch unhandled exceptions and rejections
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+  // It's good practice to exit the process after an uncaught exception
+  // process.exit(1); // Uncomment if you want the app to crash on unhandled errors
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  // Log the promise that was rejected
+  // console.error('Promise:', promise);
+});
+
 
 // Carregar credenciais do admin (hash da senha)
 let adminCredentials = {};
