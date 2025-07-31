@@ -24,6 +24,10 @@ const Peca = sequelize.define('Peca', {
     type: DataTypes.ENUM('disponivel', 'esgotado'),
     defaultValue: 'disponivel',
     allowNull: false
+  },
+  tamanho: {
+    type: DataTypes.STRING,
+    allowNull: true // Tamanho é opcional, só para anéis
   }
 });
 

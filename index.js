@@ -125,7 +125,7 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
-    const { nome, preco, tipo } = req.body;
+    const { nome, preco, tipo, tamanho } = req.body;
     const precoFormatado = preco.replace(',', '.'); // Substitui vírgula por ponto
     const parsedPreco = parseFloat(precoFormatado);
     if (isNaN(parsedPreco)) {
@@ -139,6 +139,7 @@ app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, re
       nome,
       preco: parsedPreco,
       tipo,
+      tamanho: tipo === 'Anel' ? tamanho : null, // Salva tamanho apenas se for Anel
       imagem: req.file.path, // URL do Cloudinary
       status: 'disponivel'
     });
@@ -171,7 +172,7 @@ app.get('/admin/pecas/editar/:id', checkAuth, async (req, res) => {
 
 app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
-    const { nome, preco, tipo, status } = req.body;
+    const { nome, preco, tipo, status, tamanho } = req.body;
     const precoFormatado = preco.replace(',', '.'); // Substitui vírgula por ponto
     const parsedPreco = parseFloat(precoFormatado);
     if (isNaN(parsedPreco)) {
@@ -194,6 +195,7 @@ app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (r
       preco: parsedPreco,
       tipo,
       status,
+      tamanho: tipo === 'Anel' ? tamanho : null, // Salva tamanho apenas se for Anel
       imagem: req.file ? req.file.path : peca.imagem // Mantém a imagem antiga se nenhuma nova for enviada
     });
 
