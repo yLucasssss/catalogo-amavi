@@ -159,36 +159,93 @@ app.post('/admin/pecas/nova', upload.single('imagem'), (req, res) => {
   console.log('File object:', req.file);
   console.log('Body object:', req.body);
 
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
+  if (!req.session.loggedin) {
+    res.redirect('/admin/login');
+    return;
+  }
+
+  fs.readFile('data/pecas.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading pecas.json in /admin/pecas/nova:', err);
+      res.status(500).send('Erro ao ler o arquivo de dados.');
+      return;
+    }
+    const pecas = JSON.parse(data);
+    const { nome, valor, tipo, tamanho } = req.body;
+    let errors = [];
+
+    // Validação de Nome
+    if (!nome || nome.trim() === '') {
+      errors.push('O nome da peça é obrigatório.');
+    } else {
+      const nomeExistente = pecas.some(peca => peca.nome.toLowerCase() === nome.toLowerCase());
+      if (nomeExistente) {
+        errors.push('Já existe uma peça com este nome. Por favor, escolha um nome diferente.');
+      }
+    }
+
+    // Validação de Valor
+    const parsedValor = parseFloat(valor);
+    if (isNaN(parsedValor) || parsedValor <= 0) {
+      errors.push('O valor deve ser um número positivo.');
+    }
+
+    // Validação de Tipo
+    const tiposPermitidos = ['Anel', 'Colar', 'Pulseira', 'Berloque', 'Piercing', 'Brinco', 'Trio', 'Bracelete'];
+    if (!tipo || !tiposPermitidos.includes(tipo)) {
+      errors.push('Tipo de peça inválido.');
+    }
+
+    // Validação de Tamanho para Anel
+    if (tipo === 'Anel' && (!tamanho || tamanho.trim() === '')) {
+      errors.push('O tamanho do anel é obrigatório.');
+    }
+
+    // Validação de Imagem
+    if (!req.file) {
+      errors.push('A imagem da peça é obrigatória.');
+    }
+
+    if (errors.length > 0) {
+      // Se houver erros, exclua a imagem do Cloudinary se ela foi carregada
+      if (req.file && req.file.public_id) {
+        const publicId = req.file.public_id.split('/').pop(); // Get just the public_id, not the folder
+        const folder = 'amavi';
+        const fullPublicId = `${folder}/${publicId}`;
+
+        cloudinary.uploader.destroy(fullPublicId, (error, result) => {
+          if (error) {
+            console.error('Error deleting uploaded image due to validation error:', error);
+          } else {
+            console.log('Uploaded image deleted due to validation error:', result);
+          }
+        });
+      }
+      // Renderizar a página com os erros (precisaremos de mensagens flash para isso)
+      // Por enquanto, apenas enviaremos um status 400 com os erros
+      res.status(400).send(errors.join('<br>'));
+      return;
+    }
+
+    const novaPeca = {
+      id: pecas.length > 0 ? pecas[pecas.length - 1].id + 1 : 1,
+      nome: nome,
+      valor: parsedValor,
+      disponibilidade: 'disponível',
+      tipo: tipo,
+      tamanho: tipo === 'Anel' ? tamanho : null, // Salva tamanho apenas se for Anel
+      imagem: req.file.path
+    };
+    pecas.push(novaPeca);
+    fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
       if (err) {
-        console.error('Error reading pecas.json in /admin/pecas/nova:', err);
-        res.status(500).send('Erro ao ler o arquivo de dados.');
+        console.error('Error writing pecas.json in /admin/pecas/nova:', err);
+        res.status(500).send('Erro ao salvar o arquivo de dados.');
         return;
       }
-      const pecas = JSON.parse(data);
-      const novaPeca = {
-        id: pecas.length > 0 ? pecas[pecas.length - 1].id + 1 : 1,
-        nome: req.body.nome,
-        valor: parseFloat(req.body.valor),
-        disponibilidade: 'disponível',
-        tipo: req.body.tipo,
-        tamanho: req.body.tamanho,
-        imagem: req.file ? req.file.path : null // Use req.file.path for Cloudinary URL, check if req.file exists
-      };
-      pecas.push(novaPeca);
-      fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
-        if (err) {
-          console.error('Error writing pecas.json in /admin/pecas/nova:', err);
-          res.status(500).send('Erro ao salvar o arquivo de dados.');
-          return;
-        }
-        res.redirect('/admin');
-      });
+      res.redirect('/admin');
     });
-  } else {
-    res.redirect('/admin/login');
-  }
+  });
 });
 
 app.get('/admin/pecas/editar/:id', (req, res) => {
