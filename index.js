@@ -124,7 +124,7 @@ app.post('/admin/login', async (req, res) => {
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'catalogo-amavi', // Folder in Cloudinary to store images
+    folder: 'amavi', // Folder in Cloudinary to store images
     format: async (req, file) => 'png', // supports promises as well
     public_id: (req, file) => Date.now() + '-' + file.originalname,
   },
