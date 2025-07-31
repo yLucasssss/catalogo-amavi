@@ -26,7 +26,7 @@
         <tr>
           <td><img src="<%= peca.imagem %>" alt="<%= peca.nome %>" width="50"></td>
           <td><%= peca.nome %></td>
-          <td>R$ <%= peca.valor.toFixed(2) %></td>
+          <td>R$ <%= parseFloat(peca.valor).toFixed(2) %></td>
           <td>
             <div class="form-check form-switch custom-switch">
               <input class="form-check-input" type="checkbox" id="disponibilidadeSwitch_<%= peca.id %>" data-peca-id="<%= peca.id %>" <%= peca.status === 'disponivel' ? 'checked' : '' %>>
