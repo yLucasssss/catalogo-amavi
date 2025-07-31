@@ -1,24 +1,16 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-// Extrai as partes da URL de conexão
-const dbUrl = new URL(process.env.DATABASE_URL);
-
-const sequelize = new Sequelize({
+// A string de conexão do Pooler do Supabase já é compatível com IPv4.
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  host: dbUrl.hostname,
-  port: dbUrl.port,
-  username: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.split('/')[1],
+  protocol: 'postgres',
   dialectOptions: {
     ssl: {
       require: true,
       rejectUnauthorized: false
     }
-  },
-  // Força o uso de IPv4
-  family: 4
+  }
 });
 
 module.exports = sequelize;
