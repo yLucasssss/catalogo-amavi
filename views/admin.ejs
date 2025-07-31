@@ -29,7 +29,7 @@
           <td>R$ <%= peca.valor.toFixed(2) %></td>
           <td>
             <div class="form-check form-switch custom-switch">
-              <input class="form-check-input" type="checkbox" id="disponibilidadeSwitch_<%= peca.id %>" data-peca-id="<%= peca.id %>" <%= peca.disponibilidade === 'disponível' ? 'checked' : '' %>>
+              <input class="form-check-input" type="checkbox" id="disponibilidadeSwitch_<%= peca.id %>" data-peca-id="<%= peca.id %>" <%= peca.status === 'disponivel' ? 'checked' : '' %>>
               <label class="form-check-label" for="disponibilidadeSwitch_<%= peca.id %>"></label>
             </div>
           </td>
@@ -71,7 +71,7 @@
   document.querySelectorAll('.form-check-input').forEach(switchElement => {
     switchElement.addEventListener('change', async (event) => {
       const pecaId = event.target.dataset.pecaId;
-      const novaDisponibilidade = event.target.checked ? 'disponível' : 'esgotado';
+      const novaDisponibilidade = event.target.checked ? 'disponivel' : 'esgotado';
 
       try {
         const response = await fetch(`/admin/pecas/disponibilidade/${pecaId}`, {
@@ -79,7 +79,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ disponibilidade: novaDisponibilidade })
+          body: JSON.stringify({ status: novaDisponibilidade })
         });
 
         if (!response.ok) {
