@@ -1,17 +1,24 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Extrai as partes da URL de conexão
+const dbUrl = new URL(process.env.DATABASE_URL);
+
+const sequelize = new Sequelize({
   dialect: 'postgres',
-  protocol: 'postgres',
+  host: dbUrl.hostname,
+  port: dbUrl.port,
+  username: dbUrl.username,
+  password: dbUrl.password,
+  database: dbUrl.pathname.split('/')[1],
   dialectOptions: {
     ssl: {
       require: true,
       rejectUnauthorized: false
     }
   },
-  host: 'db.nreraxgrdellhgrgxzgr.supabase.co', // Manter o host aqui
-  family: 4 // Forçar o uso de IPv4
+  // Força o uso de IPv4
+  family: 4
 });
 
 module.exports = sequelize;
