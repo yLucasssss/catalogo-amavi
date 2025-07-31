@@ -1,4 +1,9 @@
 require('dotenv').config();
+console.log('DOTENV loaded.');
+console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
+console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Loaded' : 'Not Loaded');
+console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? 'Loaded' : 'Not Loaded');
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
@@ -17,6 +22,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
+console.log('Cloudinary configured.');
 
 // Carregar credenciais do admin (hash da senha)
 let adminCredentials = {};
@@ -57,7 +63,7 @@ app.use(express.json()); // Adicionado para parsear JSON no corpo da requisiçã
 app.get('/', (req, res) => {
   fs.readFile('data/pecas.json', 'utf8', (err, data) => {
     if (err) {
-      console.error(err);
+      console.error('Error reading pecas.json in /:', err);
       res.status(500).send('Erro ao ler o arquivo de dados.');
       return;
     }
@@ -76,7 +82,7 @@ app.get('/admin', (req, res) => {
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin:', err);
         res.status(500).send('Erro ao ler o arquivo de dados.');
         return;
       }
@@ -135,10 +141,14 @@ app.get('/admin/pecas/nova', (req, res) => {
 });
 
 app.post('/admin/pecas/nova', upload.single('imagem'), (req, res) => {
+  console.log('Received request to /admin/pecas/nova');
+  console.log('File object:', req.file);
+  console.log('Body object:', req.body);
+
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin/pecas/nova:', err);
         res.status(500).send('Erro ao ler o arquivo de dados.');
         return;
       }
@@ -150,12 +160,12 @@ app.post('/admin/pecas/nova', upload.single('imagem'), (req, res) => {
         disponibilidade: 'disponível',
         tipo: req.body.tipo,
         tamanho: req.body.tamanho,
-        imagem: req.file.path // Use req.file.path for Cloudinary URL
+        imagem: req.file ? req.file.path : null // Use req.file.path for Cloudinary URL, check if req.file exists
       };
       pecas.push(novaPeca);
       fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
         if (err) {
-          console.error(err);
+          console.error('Error writing pecas.json in /admin/pecas/nova:', err);
           res.status(500).send('Erro ao salvar o arquivo de dados.');
           return;
         }
@@ -171,7 +181,7 @@ app.get('/admin/pecas/editar/:id', (req, res) => {
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin/pecas/editar/:id:', err);
         res.status(500).send('Erro ao ler o arquivo de dados.');
         return;
       }
@@ -189,10 +199,14 @@ app.get('/admin/pecas/editar/:id', (req, res) => {
 });
 
 app.post('/admin/pecas/editar/:id', upload.single('imagem'), (req, res) => {
+  console.log('Received request to /admin/pecas/editar/:id');
+  console.log('File object:', req.file);
+  console.log('Body object:', req.body);
+
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin/pecas/editar/:id POST:', err);
         res.status(500).send('Erro ao ler o arquivo de dados.');
         return;
       }
@@ -209,7 +223,7 @@ app.post('/admin/pecas/editar/:id', upload.single('imagem'), (req, res) => {
         }
         fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
           if (err) {
-            console.error(err);
+            console.error('Error writing pecas.json in /admin/pecas/editar/:id POST:', err);
             res.status(500).send('Erro ao salvar o arquivo de dados.');
             return;
           }
@@ -228,7 +242,7 @@ app.get('/admin/pecas/excluir/:id', (req, res) => {
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin/pecas/excluir/:id:', err);
         res.status(500).send('Erro ao ler o arquivo de dados.');
         return;
       }
@@ -236,7 +250,7 @@ app.get('/admin/pecas/excluir/:id', (req, res) => {
       pecas = pecas.filter(p => p.id !== parseInt(req.params.id));
       fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
         if (err) {
-          console.error(err);
+          console.error('Error writing pecas.json in /admin/pecas/excluir/:id:', err);
           res.status(500).send('Erro ao salvar o arquivo de dados.');
           return;
         }
@@ -252,7 +266,7 @@ app.post('/admin/pecas/disponibilidade/:id', (req, res) => {
   if (req.session.loggedin) {
     fs.readFile('data/pecas.json', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error('Error reading pecas.json in /admin/pecas/disponibilidade/:id:', err);
         res.status(500).json({ message: 'Erro ao ler o arquivo de dados.' });
         return;
       }
@@ -262,7 +276,7 @@ app.post('/admin/pecas/disponibilidade/:id', (req, res) => {
         pecas[pecaIndex].disponibilidade = req.body.disponibilidade;
         fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
           if (err) {
-            console.error(err);
+            console.error('Error writing pecas.json in /admin/pecas/disponibilidade/:id:', err);
             res.status(500).json({ message: 'Erro ao salvar o arquivo de dados.' });
             return;
           }
