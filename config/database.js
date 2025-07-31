@@ -9,7 +9,9 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
       require: true,
       rejectUnauthorized: false
     }
-  }
+  },
+  host: 'db.nreraxgrdellhgrgxzgr.supabase.co', // Manter o host aqui
+  family: 4 // Forçar o uso de IPv4
 });
 
 module.exports = sequelize;
