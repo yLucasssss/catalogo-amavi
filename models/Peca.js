@@ -13,7 +13,8 @@ const Peca = sequelize.define('Peca', {
   },
   preco: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+    allowNull: false,
+    defaultValue: 0.00 // Garante que o valor padrão seja 0.00
   },
   imagem: {
     type: DataTypes.STRING,

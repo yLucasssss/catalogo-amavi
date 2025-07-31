@@ -27,7 +27,12 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'amavi',
     format: async (req, file) => 'png',
-    public_id: (req, file) => `${file.fieldname}-${Date.now()}`
+    public_id: (req, file) => {
+      // Usa o nome da peça (req.body.nome) como public_id para garantir unicidade
+      // Limpa o nome para ser um public_id válido (sem espaços, caracteres especiais)
+      const nomePeca = req.body.nome ? req.body.nome.toLowerCase().replace(/[^a-z0-9]/g, '') : Date.now();
+      return `peca-${nomePeca}`;
+    }
   },
 });
 
@@ -121,13 +126,17 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
     const { nome, preco, tipo } = req.body;
+    const parsedPreco = parseFloat(preco);
+    if (isNaN(parsedPreco)) {
+      return res.status(400).send('O valor do preço deve ser um número válido.');
+    }
     if (!req.file) {
       return res.status(400).send('Imagem é obrigatória.');
     }
 
     const novaPeca = await Peca.create({
       nome,
-      preco: parseFloat(preco),
+      preco: parsedPreco,
       tipo,
       imagem: req.file.path, // URL do Cloudinary
       status: 'disponivel'
@@ -162,6 +171,10 @@ app.get('/admin/pecas/editar/:id', checkAuth, async (req, res) => {
 app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
     const { nome, preco, tipo, status } = req.body;
+    const parsedPreco = parseFloat(preco);
+    if (isNaN(parsedPreco)) {
+      return res.status(400).send('O valor do preço deve ser um número válido.');
+    }
     const peca = await Peca.findByPk(req.params.id);
 
     if (!peca) {
@@ -176,7 +189,7 @@ app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (r
 
     await peca.update({
       nome,
-      preco: parseFloat(preco),
+      preco: parsedPreco,
       tipo,
       status,
       imagem: req.file ? req.file.path : peca.imagem // Mantém a imagem antiga se nenhuma nova for enviada
