@@ -9,7 +9,7 @@
   </div>
   <div class="mb-3">
     <label for="valor" class="form-label">Valor</label>
-    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="<%= peca.valor %>" required>
+    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="<%= peca.valor.toFixed(2) %>" required>
   </div>
   <div class="mb-3">
     <label for="disponibilidade" class="form-label">Disponibilidade</label>
