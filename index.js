@@ -126,7 +126,8 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
     const { nome, preco, tipo } = req.body;
-    const parsedPreco = parseFloat(preco);
+    const precoFormatado = preco.replace(',', '.'); // Substitui vírgula por ponto
+    const parsedPreco = parseFloat(precoFormatado);
     if (isNaN(parsedPreco)) {
       return res.status(400).send('O valor do preço deve ser um número válido.');
     }
@@ -171,7 +172,8 @@ app.get('/admin/pecas/editar/:id', checkAuth, async (req, res) => {
 app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
     const { nome, preco, tipo, status } = req.body;
-    const parsedPreco = parseFloat(preco);
+    const precoFormatado = preco.replace(',', '.'); // Substitui vírgula por ponto
+    const parsedPreco = parseFloat(precoFormatado);
     if (isNaN(parsedPreco)) {
       return res.status(400).send('O valor do preço deve ser um número válido.');
     }
