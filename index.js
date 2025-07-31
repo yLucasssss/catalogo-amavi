@@ -6,7 +6,7 @@ const session = require('express-session');
 const multer = require('multer');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const saltRounds = 10; // Custo do hashing, quanto maior, mais seguro (e mais lento)
 
 // Carregar credenciais do admin (hash da senha)
@@ -268,5 +268,5 @@ app.post('/admin/pecas/disponibilidade/:id', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  console.log(`Servidor rodando na porta ${port}`);
 });
