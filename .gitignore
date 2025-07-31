@@ -30,7 +30,8 @@ dist/
 tmp/
 
 # Dependency directories
-node_modules/
+node_modules
+.env/
 
 # Optional npm cache directory
 .npm

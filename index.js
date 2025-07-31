@@ -1,118 +1,64 @@
-require('dotenv').config({ debug: true });
-console.log('DOTENV loaded.');
-console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
-console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Loaded' : 'Not Loaded');
-console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? 'Loaded' : 'Not Loaded');
-
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcrypt');
-const fs = require('fs');
 const session = require('express-session');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2; // Import cloudinary
-const { CloudinaryStorage } = require('multer-storage-cloudinary'); // Import CloudinaryStorage
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { Op } = require('sequelize');
+
+const sequelize = require('./config/database');
+const Peca = require('./models/Peca');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const saltRounds = 10; // Custo do hashing, quanto maior, mais seguro (e mais lento)
+const saltRounds = 10;
 
-// Configure Cloudinary
+// Configura o Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
-console.log('Cloudinary configured.');
 
-// Global error handlers to catch unhandled exceptions and rejections
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION:', err);
-  // It's good practice to exit the process after an uncaught exception
-  // process.exit(1); // Uncomment if you want the app to crash on unhandled errors
+// Configura o storage do Multer para o Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'amavi',
+    format: async (req, file) => 'png',
+    public_id: (req, file) => `${file.fieldname}-${Date.now()}`
+  },
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('UNHANDLED REJECTION:', reason);
-  // Log the promise that was rejected
-  // console.error('Promise:', promise);
-});
+const upload = multer({ storage: storage });
 
-
-// Carregar credenciais do admin (hash da senha)
-let adminCredentials = {};
-const adminCredentialsPath = 'data/admin_credentials.json';
-
-// Função para carregar ou criar o hash da senha
-async function loadAdminCredentials() {
-  try {
-    const data = await fs.promises.readFile(adminCredentialsPath, 'utf8');
-    adminCredentials = JSON.parse(data);
-  } catch (error) {
-    // Se o arquivo não existe ou há erro, cria um novo hash
-    console.log('Criando hash da senha do admin...');
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, saltRounds);
-    adminCredentials = {
-      username: process.env.ADMIN_USERNAME,
-      passwordHash: hashedPassword
-    };
-    await fs.promises.writeFile(adminCredentialsPath, JSON.stringify(adminCredentials, null, 2));
-    console.log('Hash da senha do admin criado e salvo.');
-  }
-}
-
-loadAdminCredentials(); // Carrega as credenciais ao iniciar o app
-
+// Middlewares
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-
 app.use(session({
-  secret: 'mysecret',
+  secret: process.env.SESSION_SECRET || 'mysecret',
   resave: false,
   saveUninitialized: true
 }));
-
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Adicionado para parsear JSON no corpo da requisição
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading pecas.json in /:', err);
-      res.status(500).send('Erro ao ler o arquivo de dados.');
-      return;
-    }
-    let pecas = JSON.parse(data);
-    const selectedType = req.query.tipo;
+// --- Rotas Públicas ---
 
-    if (selectedType) {
-      pecas = pecas.filter(peca => peca.tipo === selectedType);
-    }
-
-    res.render('index', { pecas: pecas, selectedType: selectedType });
-  });
-});
-
-app.get('/admin', (req, res) => {
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading pecas.json in /admin:', err);
-        res.status(500).send('Erro ao ler o arquivo de dados.');
-        return;
-      }
-      let pecas = JSON.parse(data);
-      const filterName = req.query.nome;
-
-      if (filterName) {
-        pecas = pecas.filter(peca => peca.nome.toLowerCase().includes(filterName.toLowerCase()));
-      }
-
-      res.render('admin', { pecas: pecas, filterName: filterName });
-    });
-  } else {
-    res.redirect('/admin/login');
+app.get('/', async (req, res) => {
+  try {
+    const { tipo } = req.query;
+    const where = tipo ? { tipo: tipo } : {};
+    const pecas = await Peca.findAll({ where });
+    res.render('index', { pecas: pecas, selectedType: tipo });
+  } catch (error) {
+    console.error('Erro ao buscar peças:', error);
+    res.status(500).send('Erro no servidor.');
   }
 });
+
+// --- Rotas de Admin ---
 
 app.get('/admin/login', (req, res) => {
   res.render('login');
@@ -120,9 +66,10 @@ app.get('/admin/login', (req, res) => {
 
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
-
-  if (username === adminCredentials.username) {
-    const match = await bcrypt.compare(password, adminCredentials.passwordHash);
+  // Lógica de autenticação (pode ser movida para um model de User no futuro)
+  if (username === process.env.ADMIN_USERNAME) {
+    const passwordHash = process.env.ADMIN_PASSWORD_HASH; // Supondo que o hash está no .env
+    const match = await bcrypt.compare(password, passwordHash);
     if (match) {
       req.session.loggedin = true;
       res.redirect('/admin');
@@ -134,252 +81,149 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-// Cloudinary storage configuration
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'amavi', // Folder in Cloudinary to store images
-    format: async (req, file) => 'png', // supports promises as well
-    public_id: (req, file) => Date.now() + '-' + file.originalname,
-  },
-});
-
-const upload = multer({ storage: storage });
-
-app.get('/admin/pecas/nova', (req, res) => {
+// Middleware para proteger rotas de admin
+const checkAuth = (req, res, next) => {
   if (req.session.loggedin) {
-    res.render('nova-peca');
+    next();
   } else {
     res.redirect('/admin/login');
   }
+};
+
+app.get('/admin', checkAuth, async (req, res) => {
+  try {
+    const { nome } = req.query;
+    const where = nome ? { nome: { [Op.iLike]: `%${nome}%` } } : {};
+    const pecas = await Peca.findAll({ where });
+    res.render('admin', { pecas: pecas, filterName: nome });
+  } catch (error) {
+    console.error('Erro ao buscar peças para admin:', error);
+    res.status(500).send('Erro no servidor.');
+  }
 });
 
-app.post('/admin/pecas/nova', upload.single('imagem'), (req, res) => {
-  console.log('Received request to /admin/pecas/nova');
-  console.log('File object:', req.file);
-  console.log('Body object:', req.body);
+app.get('/admin/pecas/nova', checkAuth, (req, res) => {
+  res.render('nova-peca');
+});
 
-  if (!req.session.loggedin) {
-    res.redirect('/admin/login');
-    return;
-  }
-
-  fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading pecas.json in /admin/pecas/nova:', err);
-      res.status(500).send('Erro ao ler o arquivo de dados.');
-      return;
-    }
-    const pecas = JSON.parse(data);
-    const { nome, valor, tipo, tamanho } = req.body;
-    let errors = [];
-
-    // Validação de Nome
-    if (!nome || nome.trim() === '') {
-      errors.push('O nome da peça é obrigatório.');
-    } else {
-      const nomeExistente = pecas.some(peca => peca.nome.toLowerCase() === nome.toLowerCase());
-      if (nomeExistente) {
-        errors.push('Já existe uma peça com este nome. Por favor, escolha um nome diferente.');
-      }
-    }
-
-    // Validação de Valor
-    const parsedValor = parseFloat(valor);
-    if (isNaN(parsedValor) || parsedValor <= 0) {
-      errors.push('O valor deve ser um número positivo.');
-    }
-
-    // Validação de Tipo
-    const tiposPermitidos = ['Anel', 'Colar', 'Pulseira', 'Berloque', 'Piercing', 'Brinco', 'Trio', 'Bracelete'];
-    if (!tipo || !tiposPermitidos.includes(tipo)) {
-      errors.push('Tipo de peça inválido.');
-    }
-
-    // Validação de Tamanho para Anel
-    if (tipo === 'Anel' && (!tamanho || tamanho.trim() === '')) {
-      errors.push('O tamanho do anel é obrigatório.');
-    }
-
-    // Validação de Imagem
+app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
+  try {
+    const { nome, preco, tipo } = req.body;
     if (!req.file) {
-      errors.push('A imagem da peça é obrigatória.');
+      return res.status(400).send('Imagem é obrigatória.');
     }
 
-    if (errors.length > 0) {
-      // Se houver erros, exclua a imagem do Cloudinary se ela foi carregada
-      if (req.file && req.file.public_id) {
-        const publicId = req.file.public_id.split('/').pop(); // Get just the public_id, not the folder
-        const folder = 'amavi';
-        const fullPublicId = `${folder}/${publicId}`;
+    const novaPeca = await Peca.create({
+      nome,
+      preco: parseFloat(preco),
+      tipo,
+      imagem: req.file.path, // URL do Cloudinary
+      status: 'disponivel'
+    });
 
-        cloudinary.uploader.destroy(fullPublicId, (error, result) => {
-          if (error) {
-            console.error('Error deleting uploaded image due to validation error:', error);
-          } else {
-            console.log('Uploaded image deleted due to validation error:', result);
-          }
-        });
-      }
-      // Renderizar a página com os erros (precisaremos de mensagens flash para isso)
-      // Por enquanto, apenas enviaremos um status 400 com os erros
-      res.status(400).send(errors.join('<br>'));
-      return;
+    res.redirect('/admin');
+  } catch (error) {
+    console.error('Erro ao criar nova peça:', error);
+    // Se der erro, tenta deletar a imagem que já foi enviada para o Cloudinary
+    if (req.file) {
+      cloudinary.uploader.destroy(req.file.filename);
+    }
+    res.status(500).send('Erro ao criar a peça.');
+  }
+});
+
+app.get('/admin/pecas/editar/:id', checkAuth, async (req, res) => {
+  try {
+    const peca = await Peca.findByPk(req.params.id);
+    if (peca) {
+      res.render('editar-peca', { peca: peca });
+    } else {
+      res.status(404).send('Peça não encontrada.');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar peça para edição:', error);
+    res.status(500).send('Erro no servidor.');
+  }
+});
+
+app.post('/admin/pecas/editar/:id', checkAuth, upload.single('imagem'), async (req, res) => {
+  try {
+    const { nome, preco, tipo, status } = req.body;
+    const peca = await Peca.findByPk(req.params.id);
+
+    if (!peca) {
+      return res.status(404).send('Peça não encontrada.');
     }
 
-    const novaPeca = {
-      id: pecas.length > 0 ? pecas[pecas.length - 1].id + 1 : 1,
-      nome: nome,
-      valor: parsedValor,
-      disponibilidade: 'disponível',
-      tipo: tipo,
-      tamanho: tipo === 'Anel' ? tamanho : null, // Salva tamanho apenas se for Anel
-      imagem: req.file.path
-    };
-    pecas.push(novaPeca);
-    fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
-      if (err) {
-        console.error('Error writing pecas.json in /admin/pecas/nova:', err);
-        res.status(500).send('Erro ao salvar o arquivo de dados.');
-        return;
-      }
-      res.redirect('/admin');
-    });
-  });
-});
+    // Se uma nova imagem for enviada, deleta a antiga do Cloudinary
+    if (req.file && peca.imagem) {
+        const publicId = peca.imagem.split('/').pop().split('.')[0];
+        cloudinary.uploader.destroy(publicId);
+    }
 
-app.get('/admin/pecas/editar/:id', (req, res) => {
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading pecas.json in /admin/pecas/editar/:id:', err);
-        res.status(500).send('Erro ao ler o arquivo de dados.');
-        return;
-      }
-      const pecas = JSON.parse(data);
-      const peca = pecas.find(p => p.id === parseInt(req.params.id));
-      if (peca) {
-        res.render('editar-peca', { peca: peca });
-      } else {
-        res.status(404).send('Peça não encontrada.');
-      }
+    await peca.update({
+      nome,
+      preco: parseFloat(preco),
+      tipo,
+      status,
+      imagem: req.file ? req.file.path : peca.imagem // Mantém a imagem antiga se nenhuma nova for enviada
     });
-  } else {
-    res.redirect('/admin/login');
+
+    res.redirect('/admin');
+  } catch (error) {
+    console.error('Erro ao editar peça:', error);
+    res.status(500).send('Erro ao editar a peça.');
   }
 });
 
-app.post('/admin/pecas/editar/:id', upload.single('imagem'), (req, res) => {
-  console.log('Received request to /admin/pecas/editar/:id');
-  console.log('File object:', req.file);
-  console.log('Body object:', req.body);
+app.get('/admin/pecas/excluir/:id', checkAuth, async (req, res) => {
+  try {
+    const peca = await Peca.findByPk(req.params.id);
 
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading pecas.json in /admin/pecas/editar/:id POST:', err);
-        res.status(500).send('Erro ao ler o arquivo de dados.');
-        return;
-      }
-      let pecas = JSON.parse(data);
-      const pecaIndex = pecas.findIndex(p => p.id === parseInt(req.params.id));
-      if (pecaIndex !== -1) {
-        pecas[pecaIndex].nome = req.body.nome;
-        pecas[pecaIndex].valor = parseFloat(req.body.valor);
-        pecas[pecaIndex].disponibilidade = req.body.disponibilidade;
-        pecas[pecaIndex].tipo = req.body.tipo;
-        pecas[pecaIndex].tamanho = req.body.tamanho;
-        if (req.file) {
-          pecas[pecaIndex].imagem = req.file.path; // Use req.file.path for Cloudinary URL
-        }
-        fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
-          if (err) {
-            console.error('Error writing pecas.json in /admin/pecas/editar/:id POST:', err);
-            res.status(500).send('Erro ao salvar o arquivo de dados.');
-            return;
-          }
-          res.redirect('/admin');
-        });
-      } else {
-        res.status(404).send('Peça não encontrada.');
-      }
-    });
-  } else {
-    res.redirect('/admin/login');
+    if (!peca) {
+      return res.status(404).send('Peça não encontrada.');
+    }
+
+    // Deleta a imagem do Cloudinary
+    if (peca.imagem) {
+        const publicId = peca.imagem.split('/').pop().split('.')[0];
+        cloudinary.uploader.destroy(publicId);
+    }
+
+    await peca.destroy();
+
+    res.redirect('/admin');
+  } catch (error) {
+    console.error('Erro ao excluir peça:', error);
+    res.status(500).send('Erro ao excluir a peça.');
   }
 });
 
-app.get('/admin/pecas/excluir/:id', (req, res) => {
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading pecas.json in /admin/pecas/excluir/:id:', err);
-        res.status(500).send('Erro ao ler o arquivo de dados.');
-        return;
-      }
-      let pecas = JSON.parse(data);
-      const pecaToDelete = pecas.find(p => p.id === parseInt(req.params.id));
+// Função para iniciar o servidor
+const startServer = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Conexão com o banco de dados estabelecida com sucesso.');
 
-      if (pecaToDelete && pecaToDelete.imagem) {
-        // Extract public ID from Cloudinary URL
-        const publicId = pecaToDelete.imagem.split('/').pop().split('.')[0];
-        const folder = 'amavi'; // Ensure this matches your Cloudinary folder
-        const fullPublicId = `${folder}/${publicId}`;
+    // Sincroniza os models com o banco de dados (cria as tabelas se não existirem)
+    await sequelize.sync({ alter: true });
+    console.log('Tabelas sincronizadas.');
 
-        cloudinary.uploader.destroy(fullPublicId, (error, result) => {
-          if (error) {
-            console.error('Error deleting image from Cloudinary:', error);
-            // Continue with deleting the item from JSON even if image deletion fails
-          } else {
-            console.log('Image deleted from Cloudinary:', result);
-          }
-        });
-      }
+    // Gera o hash da senha do admin se não estiver no .env
+    if (!process.env.ADMIN_PASSWORD_HASH) {
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, saltRounds);
+        console.log('--- HASH DA SENHA DO ADMIN ---');
+        console.log('Copie esta linha para o seu arquivo .env:');
+        console.log(`ADMIN_PASSWORD_HASH=${hashedPassword}`);
+        console.log('--------------------------------');
+    }
 
-      pecas = pecas.filter(p => p.id !== parseInt(req.params.id));
-      fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
-        if (err) {
-          console.error('Error writing pecas.json in /admin/pecas/excluir/:id:', err);
-          res.status(500).send('Erro ao salvar o arquivo de dados.');
-          return;
-        }
-        res.redirect('/admin');
-      });
+    app.listen(port, () => {
+      console.log(`Servidor rodando na porta ${port}`);
     });
-  } else {
-    res.redirect('/admin/login');
+  } catch (error) {
+    console.error('Não foi possível conectar ao banco de dados:', error);
   }
-});
+};
 
-app.post('/admin/pecas/disponibilidade/:id', (req, res) => {
-  if (req.session.loggedin) {
-    fs.readFile('data/pecas.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading pecas.json in /admin/pecas/disponibilidade/:id:', err);
-        res.status(500).json({ message: 'Erro ao ler o arquivo de dados.' });
-        return;
-      }
-      let pecas = JSON.parse(data);
-      const pecaIndex = pecas.findIndex(p => p.id === parseInt(req.params.id));
-      if (pecaIndex !== -1) {
-        pecas[pecaIndex].disponibilidade = req.body.disponibilidade;
-        fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
-          if (err) {
-            console.error('Error writing pecas.json in /admin/pecas/disponibilidade/:id:', err);
-            res.status(500).json({ message: 'Erro ao salvar o arquivo de dados.' });
-            return;
-          }
-          res.json({ message: 'Disponibilidade atualizada com sucesso.' });
-        });
-      } else {
-        res.status(404).json({ message: 'Peça não encontrada.' });
-      }
-    });
-  } else {
-    res.status(401).json({ message: 'Não autorizado.' });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
+startServer();
