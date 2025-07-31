@@ -80,6 +80,7 @@ app.post('/admin/login', async (req, res) => {
 
   try {
     const match = await bcrypt.compare(password, passwordHash);
+
     if (match) {
       req.session.loggedin = true;
       res.redirect('/admin');
@@ -146,6 +147,7 @@ app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, re
 app.get('/admin/pecas/editar/:id', checkAuth, async (req, res) => {
   try {
     const peca = await Peca.findByPk(req.params.id);
+
     if (peca) {
       res.render('editar-peca', { peca: peca });
     } else {
@@ -207,6 +209,24 @@ app.get('/admin/pecas/excluir/:id', checkAuth, async (req, res) => {
   } catch (error) {
     console.error('Erro ao excluir peça:', error);
     res.status(500).send('Erro ao excluir a peça.');
+  }
+});
+
+app.post('/admin/pecas/disponibilidade/:id', checkAuth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const peca = await Peca.findByPk(req.params.id);
+
+    if (!peca) {
+      return res.status(404).json({ message: 'Peça não encontrada.' });
+    }
+
+    await peca.update({ status: status });
+
+    res.json({ message: 'Disponibilidade atualizada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao atualizar disponibilidade:', error);
+    res.status(500).json({ message: 'Erro ao atualizar a disponibilidade.' });
   }
 });
 
