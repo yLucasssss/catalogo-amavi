@@ -9,7 +9,9 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     ssl: {
       require: true,
       rejectUnauthorized: false
-    }
+    },
+    native: false, // Força o Sequelize a não usar o driver nativo do pg, permitindo typeCast
+    typeCast: true // Habilita o type casting para converter tipos de banco de dados para tipos JS
   }
 });
 

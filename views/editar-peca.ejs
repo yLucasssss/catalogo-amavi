@@ -9,13 +9,13 @@
   </div>
   <div class="mb-3">
     <label for="valor" class="form-label">Valor</label>
-    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="<%= peca.valor.toFixed(2) %>" required>
+    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="<%= parseFloat(peca.valor).toFixed(2) %>" required>
   </div>
   <div class="mb-3">
-    <label for="disponibilidade" class="form-label">Disponibilidade</label>
-    <select class="form-select" id="disponibilidade" name="disponibilidade">
-      <option value="disponível" <%= peca.disponibilidade === 'disponível' ? 'selected' : '' %>>Disponível</option>
-      <option value="esgotado" <%= peca.disponibilidade === 'esgotado' ? 'selected' : '' %>>Esgotado</option>
+    <label for="status" class="form-label">Status</label>
+    <select class="form-select" id="status" name="status">
+      <option value="disponivel" <%= peca.status === 'disponivel' ? 'selected' : '' %>>Disponível</option>
+      <option value="esgotado" <%= peca.status === 'esgotado' ? 'selected' : '' %>>Esgotado</option>
     </select>
   </div>
   <div class="mb-3">
