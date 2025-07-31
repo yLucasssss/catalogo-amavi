@@ -127,7 +127,7 @@ app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, re
   try {
     const { nome, preco, tipo, tamanho } = req.body;
 
-    // Validação de entrada
+    // Validação de entrada (agora após o multer processar req.body)
     if (!nome || typeof nome !== 'string' || nome.trim() === '') {
       return res.status(400).send('O nome da peça é obrigatório e deve ser um texto válido.');
     }
