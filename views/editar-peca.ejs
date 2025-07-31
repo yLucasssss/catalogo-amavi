@@ -23,8 +23,12 @@
     <select class="form-select" id="tipo" name="tipo">
       <option value="Anel" <%= peca.tipo === 'Anel' ? 'selected' : '' %>>Anel</option>
       <option value="Colar" <%= peca.tipo === 'Colar' ? 'selected' : '' %>>Colar</option>
-      <option value="Brinco" <%= peca.tipo === 'Brinco' ? 'selected' : '' %>>Brinco</option>
       <option value="Pulseira" <%= peca.tipo === 'Pulseira' ? 'selected' : '' %>>Pulseira</option>
+      <option value="Berloque" <%= peca.tipo === 'Berloque' ? 'selected' : '' %>>Berloque</option>
+      <option value="Piercing" <%= peca.tipo === 'Piercing' ? 'selected' : '' %>>Piercing</option>
+      <option value="Brinco" <%= peca.tipo === 'Brinco' ? 'selected' : '' %>>Brinco</option>
+      <option value="Trio" <%= peca.tipo === 'Trio' ? 'selected' : '' %>>Trio</option>
+      <option value="Bracelete" <%= peca.tipo === 'Bracelete' ? 'selected' : '' %>>Bracelete</option>
     </select>
   </div>
   <div class="mb-3" id="tamanho-anel" style="<%= peca.tipo === 'Anel' ? 'display: block;' : 'display: none;' %>">
