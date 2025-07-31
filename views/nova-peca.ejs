@@ -13,15 +13,16 @@
   </div>
   <div class="mb-3">
     <label for="tipo" class="form-label">Tipo</label>
-    <select class="form-select" id="tipo" name="tipo">
+    <select class="form-select" id="tipo" name="tipo" required>
+      <option value="">Selecione o Tipo</option>
       <option value="Anel">Anel</option>
-      <option value="Colar">Colar</option>
-      <option value="Pulseira">Pulseira</option>
       <option value="Berloque">Berloque</option>
-      <option value="Piercing">Piercing</option>
-      <option value="Brinco">Brinco</option>
-      <option value="Trio">Trio</option>
       <option value="Bracelete">Bracelete</option>
+      <option value="Brinco">Brinco</option>
+      <option value="Colar">Colar</option>
+      <option value="Piercing">Piercing</option>
+      <option value="Pulseira">Pulseira</option>
+      <option value="Trio">Trio</option>
     </select>
   </div>
   <div class="mb-3" id="tamanho-anel" style="display: none;">
@@ -37,10 +38,16 @@
 
 <script>
   document.getElementById('tipo').addEventListener('change', function() {
+    const tamanhoAnelDiv = document.getElementById('tamanho-anel');
+    const tamanhoAnelInput = document.getElementById('tamanho');
+
     if (this.value === 'Anel') {
-      document.getElementById('tamanho-anel').style.display = 'block';
+      tamanhoAnelDiv.style.display = 'block';
+      tamanhoAnelInput.setAttribute('required', 'required');
     } else {
-      document.getElementById('tamanho-anel').style.display = 'none';
+      tamanhoAnelDiv.style.display = 'none';
+      tamanhoAnelInput.removeAttribute('required');
+      tamanhoAnelInput.value = ''; // Limpa o valor quando escondido
     }
   });
 </script>

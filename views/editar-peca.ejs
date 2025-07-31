@@ -20,15 +20,16 @@
   </div>
   <div class="mb-3">
     <label for="tipo" class="form-label">Tipo</label>
-    <select class="form-select" id="tipo" name="tipo">
+    <select class="form-select" id="tipo" name="tipo" required>
+      <option value="">Selecione o Tipo</option>
       <option value="Anel" <%= peca.tipo === 'Anel' ? 'selected' : '' %>>Anel</option>
-      <option value="Colar" <%= peca.tipo === 'Colar' ? 'selected' : '' %>>Colar</option>
-      <option value="Pulseira" <%= peca.tipo === 'Pulseira' ? 'selected' : '' %>>Pulseira</option>
       <option value="Berloque" <%= peca.tipo === 'Berloque' ? 'selected' : '' %>>Berloque</option>
-      <option value="Piercing" <%= peca.tipo === 'Piercing' ? 'selected' : '' %>>Piercing</option>
-      <option value="Brinco" <%= peca.tipo === 'Brinco' ? 'selected' : '' %>>Brinco</option>
-      <option value="Trio" <%= peca.tipo === 'Trio' ? 'selected' : '' %>>Trio</option>
       <option value="Bracelete" <%= peca.tipo === 'Bracelete' ? 'selected' : '' %>>Bracelete</option>
+      <option value="Brinco" <%= peca.tipo === 'Brinco' ? 'selected' : '' %>>Brinco</option>
+      <option value="Colar" <%= peca.tipo === 'Colar' ? 'selected' : '' %>>Colar</option>
+      <option value="Piercing" <%= peca.tipo === 'Piercing' ? 'selected' : '' %>>Piercing</option>
+      <option value="Pulseira" <%= peca.tipo === 'Pulseira' ? 'selected' : '' %>>Pulseira</option>
+      <option value="Trio" <%= peca.tipo === 'Trio' ? 'selected' : '' %>>Trio</option>
     </select>
   </div>
   <div class="mb-3" id="tamanho-anel" style="<%= peca.tipo === 'Anel' ? 'display: block;' : 'display: none;' %>">
@@ -45,10 +46,31 @@
 
 <script>
   document.getElementById('tipo').addEventListener('change', function() {
+    const tamanhoAnelDiv = document.getElementById('tamanho-anel');
+    const tamanhoAnelInput = document.getElementById('tamanho');
+
     if (this.value === 'Anel') {
-      document.getElementById('tamanho-anel').style.display = 'block';
+      tamanhoAnelDiv.style.display = 'block';
+      tamanhoAnelInput.setAttribute('required', 'required');
     } else {
-      document.getElementById('tamanho-anel').style.display = 'none';
+      tamanhoAnelDiv.style.display = 'none';
+      tamanhoAnelInput.removeAttribute('required');
+      tamanhoAnelInput.value = ''; // Limpa o valor quando escondido
+    }
+  });
+
+  // Lógica para garantir que o campo de tamanho do anel seja exibido/ocultado corretamente ao carregar a página
+  document.addEventListener('DOMContentLoaded', function() {
+    const tipoSelect = document.getElementById('tipo');
+    const tamanhoAnelDiv = document.getElementById('tamanho-anel');
+    const tamanhoAnelInput = document.getElementById('tamanho');
+
+    if (tipoSelect.value === 'Anel') {
+      tamanhoAnelDiv.style.display = 'block';
+      tamanhoAnelInput.setAttribute('required', 'required');
+    } else {
+      tamanhoAnelDiv.style.display = 'none';
+      tamanhoAnelInput.removeAttribute('required');
     }
   });
 </script>
