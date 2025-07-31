@@ -66,9 +66,19 @@ app.get('/admin/login', (req, res) => {
 
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
-  // Lógica de autenticação (pode ser movida para um model de User no futuro)
-  if (username === process.env.ADMIN_USERNAME) {
-    const passwordHash = process.env.ADMIN_PASSWORD_HASH; // Supondo que o hash está no .env
+
+  if (username !== process.env.ADMIN_USERNAME) {
+    return res.send('Usuário ou senha incorretos!');
+  }
+
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+
+  if (!passwordHash) {
+    console.error('ERRO CRÍTICO: A variável de ambiente ADMIN_PASSWORD_HASH não está configurada.');
+    return res.status(500).send('Erro de configuração do servidor. O administrador foi notificado.');
+  }
+
+  try {
     const match = await bcrypt.compare(password, passwordHash);
     if (match) {
       req.session.loggedin = true;
@@ -76,8 +86,9 @@ app.post('/admin/login', async (req, res) => {
     } else {
       res.send('Usuário ou senha incorretos!');
     }
-  } else {
-    res.send('Usuário ou senha incorretos!');
+  } catch (error) {
+    console.error('Erro ao comparar a senha com bcrypt:', error);
+    res.status(500).send('Erro interno no processo de login.');
   }
 });
 
