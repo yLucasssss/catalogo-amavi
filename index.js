@@ -4,10 +4,19 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const session = require('express-session');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2; // Import cloudinary
+const { CloudinaryStorage } = require('multer-storage-cloudinary'); // Import CloudinaryStorage
 
 const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Custo do hashing, quanto maior, mais seguro (e mais lento)
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Carregar credenciais do admin (hash da senha)
 let adminCredentials = {};
@@ -105,13 +114,14 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/')
+// Cloudinary storage configuration
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'catalogo-amavi', // Folder in Cloudinary to store images
+    format: async (req, file) => 'png', // supports promises as well
+    public_id: (req, file) => Date.now() + '-' + file.originalname,
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname)
-  }
 });
 
 const upload = multer({ storage: storage });
@@ -140,7 +150,7 @@ app.post('/admin/pecas/nova', upload.single('imagem'), (req, res) => {
         disponibilidade: 'disponível',
         tipo: req.body.tipo,
         tamanho: req.body.tamanho,
-        imagem: req.file.filename
+        imagem: req.file.path // Use req.file.path for Cloudinary URL
       };
       pecas.push(novaPeca);
       fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
@@ -195,7 +205,7 @@ app.post('/admin/pecas/editar/:id', upload.single('imagem'), (req, res) => {
         pecas[pecaIndex].tipo = req.body.tipo;
         pecas[pecaIndex].tamanho = req.body.tamanho;
         if (req.file) {
-          pecas[pecaIndex].imagem = req.file.filename;
+          pecas[pecaIndex].imagem = req.file.path; // Use req.file.path for Cloudinary URL
         }
         fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
           if (err) {

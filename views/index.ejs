@@ -15,7 +15,7 @@
     <% pecas.forEach(peca => { %>
       <div class="col">
         <div class="card h-100 <%= peca.disponibilidade === 'esgotado' ? 'sold-out-card' : '' %>" data-bs-toggle="modal" data-bs-target="#detailModal_<%= peca.id %>">
-          <img src="/uploads/<%= peca.imagem %>" class="card-img-top" alt="<%= peca.nome %>">
+          <img src="<%= peca.imagem %>" class="card-img-top" alt="<%= peca.nome %>">
           <% if (peca.disponibilidade === 'esgotado') { %>
             <div class="sold-out-overlay">
               <span class="sold-out-text">ESGOTADO</span>
@@ -45,7 +45,7 @@
             <div class="modal-body">
               <div class="row">
                 <div class="col-md-6">
-                  <img src="/uploads/<%= peca.imagem %>" class="img-fluid rounded" alt="<%= peca.nome %>">
+                  <img src="<%= peca.imagem %>" class="img-fluid rounded" alt="<%= peca.nome %>">
                 </div>
                 <div class="col-md-6">
                   <h3>R$ <%= peca.valor.toFixed(2) %></h3>

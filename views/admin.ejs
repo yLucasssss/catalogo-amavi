@@ -24,7 +24,7 @@
     <% if (typeof pecas !== 'undefined' && pecas.length > 0) { %>
       <% pecas.forEach(peca => { %>
         <tr>
-          <td><img src="/uploads/<%= peca.imagem %>" alt="<%= peca.nome %>" width="50"></td>
+          <td><img src="<%= peca.imagem %>" alt="<%= peca.nome %>" width="50"></td>
           <td><%= peca.nome %></td>
           <td>R$ <%= peca.valor.toFixed(2) %></td>
           <td>
