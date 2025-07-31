@@ -1,0 +1,52 @@
+Crie um site de catálogo utilizando Node.js (com Express) e Bootstrap 5 como requisitos principais.
+
+Funcionalidades:
+Catálogo público:
+Exibe as peças em cards responsivos usando Bootstrap.
+
+Cada peça deve mostrar:
+
+Imagem da peça
+
+Nome
+
+Valor
+
+Disponibilidade (disponível ou esgotado)
+
+Se for um Anel, deve exibir também o tamanho.
+
+Área administrativa (somente um usuário master):
+Tela de login protegida (sem cadastro público).
+
+Permitir ao usuário master:
+
+Cadastrar novas peças no catálogo
+
+Editar e excluir peças existentes
+
+Marcar uma peça como "Esgotado" (essa marcação deve refletir no catálogo público)
+
+No cadastro, se a peça for um Anel, exibir campo extra para informar o tamanho.
+
+Estilo visual:
+Usar o logo da marca (logo.png, fornecido pelo usuário) no topo do site.
+
+Aplicar a seguinte paleta de cores:
+
+Fundo principal: #fdf9f5
+
+Elementos de destaque (botões, títulos, links): #e0a2a2
+
+Design simples, elegante, focado na apresentação das peças.
+
+Detalhes técnicos:
+Utilizar EJS como mecanismo de templates.
+
+Usar multer para upload de imagem da peça.
+
+Os dados podem ser armazenados em JSON local ou SQLite.
+
+Projeto deve rodar com npm start localmente (não precisa ser publicado).
+
+Todas as funcionalidades devem funcionar de forma fluida e responsiva.

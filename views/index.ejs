@@ -1,0 +1,74 @@
+<%- include('partials/header') %>
+
+<h1 class="text-start">Catálogo de Peças</h1>
+
+<div class="d-flex justify-content-start flex-wrap mb-4 filter-buttons mt-4">
+  <a href="/" class="btn <%= typeof selectedType === 'undefined' || selectedType === '' ? 'active' : '' %>">Todos</a>
+  <a href="/?tipo=Anel" class="btn <%= typeof selectedType !== 'undefined' && selectedType === 'Anel' ? 'active' : '' %>">Anel</a>
+  <a href="/?tipo=Colar" class="btn <%= typeof selectedType !== 'undefined' && selectedType === 'Colar' ? 'active' : '' %>">Colar</a>
+  <a href="/?tipo=Brinco" class="btn <%= typeof selectedType !== 'undefined' && selectedType === 'Brinco' ? 'active' : '' %>">Brinco</a>
+  <a href="/?tipo=Pulseira" class="btn <%= typeof selectedType !== 'undefined' && selectedType === 'Pulseira' ? 'active' : '' %>">Pulseira</a>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+  <% if (typeof pecas !== 'undefined' && pecas.length > 0) { %>
+    <% pecas.forEach(peca => { %>
+      <div class="col">
+        <div class="card h-100 <%= peca.disponibilidade === 'esgotado' ? 'sold-out-card' : '' %>" data-bs-toggle="modal" data-bs-target="#detailModal_<%= peca.id %>">
+          <img src="/uploads/<%= peca.imagem %>" class="card-img-top" alt="<%= peca.nome %>">
+          <% if (peca.disponibilidade === 'esgotado') { %>
+            <div class="sold-out-overlay">
+              <span class="sold-out-text">ESGOTADO</span>
+            </div>
+          <% } %>
+          <div class="card-body">
+            <h5 class="card-title"><%= peca.nome %></h5>
+            <p class="card-text price-text">R$ <%= peca.valor.toFixed(2) %></p>
+            <% if (peca.disponibilidade === 'esgotado') { %>
+              <p class="card-text availability-text sold-out">ESGOTADO</p>
+            <% } %>
+            <% if (peca.tipo === 'Anel') { %>
+              <p class="card-text size-text">Tamanho: <%= peca.tamanho %></p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="detailModal_<%= peca.id %>" tabindex="-1" aria-labelledby="detailModalLabel_<%= peca.id %>" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="detailModalLabel_<%= peca.id %>"><%= peca.nome %></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <img src="/uploads/<%= peca.imagem %>" class="img-fluid rounded" alt="<%= peca.nome %>">
+                </div>
+                <div class="col-md-6">
+                  <h3>R$ <%= peca.valor.toFixed(2) %></h3>
+                  <% if (peca.disponibilidade === 'esgotado') { %>
+                    <p class="lead text-danger"><br>&#9888; Essa peça linda está fora de estoque no momento, mas podemos fazer o pedido especialmente pra você com todo carinho! 💖</p>
+                  <% } else { %>
+                    <p class="lead text-success">Disponível</p>
+                  <% } %>
+                  <% if (peca.tipo === 'Anel') { %>
+                    <p><strong>Tamanho:</strong> <%= peca.tamanho %></p>
+                  <% } %>
+                  <p><strong>Tipo:</strong> <%= peca.tipo %></p>
+                  <a href="https://wa.me/5535998818786?text=<%= encodeURIComponent(peca.disponibilidade === 'esgotado' ? `Oii Estava vendo o catálogo e me apaixonei pela peça "${peca.nome}"\nSei que ela está esgotada no momento, mas posso encomendar especialmente pra mim? Quero garantir a minha! Como faço pra encomendar?` : `Oii, estava vendo o catálogo e me apaixonei pela peça "${peca.nome}"\nJa quero garantir a minha! Como faço pra comprar?`) %>" target="_blank" class="btn btn-buy-custom mt-3"><i class="fas fa-shopping-cart"></i> <%= peca.disponibilidade === 'esgotado' ? 'Encomendar' : 'Comprar' %></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <p>Nenhuma peça cadastrada.</p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

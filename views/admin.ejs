@@ -1,0 +1,114 @@
+<%- include('partials/header') %>
+
+<h1>Área Administrativa</h1>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="/admin/pecas/nova" class="btn btn-primary">Nova Peça</a>
+  <form action="/admin" method="GET" class="d-flex">
+    <input type="text" name="nome" class="form-control me-2" placeholder="Filtrar por nome" value="<%= typeof filterName !== 'undefined' ? filterName : '' %>">
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </form>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Imagem</th>
+      <th>Nome</th>
+      <th>Valor</th>
+      <th>Disponibilidade</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (typeof pecas !== 'undefined' && pecas.length > 0) { %>
+      <% pecas.forEach(peca => { %>
+        <tr>
+          <td><img src="/uploads/<%= peca.imagem %>" alt="<%= peca.nome %>" width="50"></td>
+          <td><%= peca.nome %></td>
+          <td>R$ <%= peca.valor.toFixed(2) %></td>
+          <td>
+            <div class="form-check form-switch custom-switch">
+              <input class="form-check-input" type="checkbox" id="disponibilidadeSwitch_<%= peca.id %>" data-peca-id="<%= peca.id %>" <%= peca.disponibilidade === 'disponível' ? 'checked' : '' %>>
+              <label class="form-check-label" for="disponibilidadeSwitch_<%= peca.id %>"></label>
+            </div>
+          </td>
+          <td>
+            <a href="/admin/pecas/editar/<%= peca.id %>" class="btn btn-sm btn-primary">Editar</a>
+            <button type="button" class="btn btn-sm btn-danger-custom" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-peca-id="<%= peca.id %>">Excluir</button>
+          </td>
+        </tr>
+      <% }); %>
+    <% } else { %>
+      <tr>
+        <td colspan="5">Nenhuma peça cadastrada.</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir esta peça?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger-custom" id="confirmDeleteBtn">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Lógica para o switch de disponibilidade
+  document.querySelectorAll('.form-check-input').forEach(switchElement => {
+    switchElement.addEventListener('change', async (event) => {
+      const pecaId = event.target.dataset.pecaId;
+      const novaDisponibilidade = event.target.checked ? 'disponível' : 'esgotado';
+
+      try {
+        const response = await fetch(`/admin/pecas/disponibilidade/${pecaId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ disponibilidade: novaDisponibilidade })
+        });
+
+        if (!response.ok) {
+          alert('Erro ao atualizar a disponibilidade.');
+          event.target.checked = !event.target.checked;
+        }
+      } catch (error) {
+        console.error('Erro de rede:', error);
+        alert('Erro de rede ao atualizar a disponibilidade.');
+        event.target.checked = !event.target.checked;
+      }
+    });
+  });
+
+  // Lógica para o modal de confirmação de exclusão
+  const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  let pecaIdToDelete = null;
+
+  confirmDeleteModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+    pecaIdToDelete = button.dataset.pecaId;
+  });
+
+  confirmDeleteBtn.addEventListener('click', () => {
+    if (pecaIdToDelete) {
+      window.location.href = `/admin/pecas/excluir/${pecaIdToDelete}`;
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,228 @@
+/* Estilos gerais */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fdf9f5;
+}
+
+h1 {
+  color: #e0a2a2;
+  text-align: start; /* Alinha o título à esquerda */
+  font-weight: bold;
+  margin-top: 2rem; /* Adiciona margem superior para descolar do cabeçalho */
+  margin-bottom: 1rem; /* Reduz a margem inferior do título */
+}
+
+/* Navbar */
+.navbar {
+  background-color: #e0a2a2;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  padding: 10px 0;
+  position: relative; /* Para posicionar o ícone do Instagram */
+}
+
+.navbar-brand {
+    display: block; /* Garante que a logo ocupe sua própria linha */
+    margin: 0 auto; /* Centraliza a logo */
+    width: fit-content; /* Ajusta a largura ao conteúdo */
+}
+
+.navbar-logo {
+  max-height: 80px; /* Aumenta o tamanho da logo */
+}
+
+.instagram-icon-link {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    font-size: 1.8rem;
+    text-decoration: none;
+}
+
+.instagram-icon-link:hover {
+    color: #f0f0f0;
+}
+
+/* Cards de produto */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,.1);
+  transition: transform .2s;
+  cursor: pointer;
+  position: relative; /* Para posicionar o overlay */
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card-img-top {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.sold-out-card .card-img-top {
+    filter: grayscale(100%) brightness(50%); /* Imagem preta e branca com opacidade */
+}
+
+.sold-out-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Fundo preto semi-transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    z-index: 1; /* Garante que o overlay fique acima da imagem */
+}
+
+.sold-out-text {
+    background-color: #e0a2a2; /* Fundo rosa */
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 50px; /* Arredondado */
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.card-body {
+  text-align: center;
+}
+
+.card-title {
+  color: #e0a2a2;
+  font-weight: bold;
+}
+
+.card-text {
+  color: #666;
+}
+
+.price-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333; /* Cor preta */
+}
+
+.availability-text {
+    font-weight: bold;
+}
+
+.availability-text.available {
+    color: #28a745; /* Verde para disponível */
+}
+
+.availability-text.sold-out {
+    display: none; /* Esconde o texto de disponibilidade quando o overlay está ativo */
+}
+
+.size-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Botões */
+.btn-primary {
+  background-color: #e0a2a2;
+  border-color: #e0a2a2;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: bold;
+  transition: background-color .2s;
+}
+
+.btn-primary:hover {
+  background-color: #d48f8f;
+  border-color: #d48f8f;
+}
+
+.btn-danger-custom {
+    background-color: #fdf9f5;
+    color: #e0a2a2;
+    border: 1px solid #e0a2a2;
+    border-radius: 20px;
+    padding: 8px 16px; /* Ajustado para ser um pouco menor */
+    font-weight: bold;
+    transition: background-color .2s, color .2s;
+}
+
+.btn-danger-custom:hover {
+    background-color: #e0a2a2;
+    color: #fdf9f5;
+}
+
+.btn-buy-custom {
+    background-color: #a2e0a2; /* Verde pastel */
+    border-color: #a2e0a2;
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color .2s;
+}
+
+.btn-buy-custom:hover {
+    background-color: #8fd48f;
+    border-color: #8fd48f;
+}
+
+.btn-buy-custom i {
+    margin-right: 8px;
+}
+
+/* Estilo do Switch Personalizado */
+.form-check-input:checked {
+    background-color: #e0a2a2;
+    border-color: #e0a2a2;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(224, 162, 162, 0.25);
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: #e0a2a2;
+    color: #ffffff;
+}
+
+.modal-title {
+    color: #ffffff;
+}
+
+.modal-body h3 {
+    color: #e0a2a2;
+    font-weight: bold;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Filtro de botões */
+.filter-buttons {
+    margin-top: 1rem; /* Adiciona margem superior para descolar do cabeçalho */
+    margin-bottom: 2rem; /* Adiciona margem inferior para descolar dos cards */
+}
+
+.filter-buttons .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    background-color: #fdf9f5;
+    color: #e0a2a2;
+    border: 1px solid #e0a2a2;
+}
+
+.filter-buttons .btn.active {
+    background-color: #e0a2a2;
+    color: #ffffff;
+}

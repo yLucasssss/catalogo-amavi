@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+
+<h1>Editar Peça</h1>
+
+<form action="/admin/pecas/editar/<%= peca.id %>" method="POST" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label for="nome" class="form-label">Nome</label>
+    <input type="text" class="form-control" id="nome" name="nome" value="<%= peca.nome %>" required>
+  </div>
+  <div class="mb-3">
+    <label for="valor" class="form-label">Valor</label>
+    <input type="number" step="0.01" class="form-control" id="valor" name="valor" value="<%= peca.valor %>" required>
+  </div>
+  <div class="mb-3">
+    <label for="disponibilidade" class="form-label">Disponibilidade</label>
+    <select class="form-select" id="disponibilidade" name="disponibilidade">
+      <option value="disponível" <%= peca.disponibilidade === 'disponível' ? 'selected' : '' %>>Disponível</option>
+      <option value="esgotado" <%= peca.disponibilidade === 'esgotado' ? 'selected' : '' %>>Esgotado</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="tipo" class="form-label">Tipo</label>
+    <select class="form-select" id="tipo" name="tipo">
+      <option value="Anel" <%= peca.tipo === 'Anel' ? 'selected' : '' %>>Anel</option>
+      <option value="Colar" <%= peca.tipo === 'Colar' ? 'selected' : '' %>>Colar</option>
+      <option value="Brinco" <%= peca.tipo === 'Brinco' ? 'selected' : '' %>>Brinco</option>
+      <option value="Pulseira" <%= peca.tipo === 'Pulseira' ? 'selected' : '' %>>Pulseira</option>
+    </select>
+  </div>
+  <div class="mb-3" id="tamanho-anel" style="<%= peca.tipo === 'Anel' ? 'display: block;' : 'display: none;' %>">
+    <label for="tamanho" class="form-label">Tamanho do Anel</label>
+    <input type="text" class="form-control" id="tamanho" name="tamanho" value="<%= peca.tamanho %>">
+  </div>
+  <div class="mb-3">
+    <label for="imagem" class="form-label">Imagem</label>
+    <input type="file" class="form-control" id="imagem" name="imagem">
+    <img src="/uploads/<%= peca.imagem %>" alt="<%= peca.nome %>" width="100" class="mt-2">
+  </div>
+  <button type="submit" class="btn btn-primary">Salvar</button>
+</form>
+
+<script>
+  document.getElementById('tipo').addEventListener('change', function() {
+    if (this.value === 'Anel') {
+      document.getElementById('tamanho-anel').style.display = 'block';
+    } else {
+      document.getElementById('tamanho-anel').style.display = 'none';
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>
