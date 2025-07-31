@@ -261,6 +261,24 @@ app.get('/admin/pecas/excluir/:id', (req, res) => {
         return;
       }
       let pecas = JSON.parse(data);
+      const pecaToDelete = pecas.find(p => p.id === parseInt(req.params.id));
+
+      if (pecaToDelete && pecaToDelete.imagem) {
+        // Extract public ID from Cloudinary URL
+        const publicId = pecaToDelete.imagem.split('/').pop().split('.')[0];
+        const folder = 'amavi'; // Ensure this matches your Cloudinary folder
+        const fullPublicId = `${folder}/${publicId}`;
+
+        cloudinary.uploader.destroy(fullPublicId, (error, result) => {
+          if (error) {
+            console.error('Error deleting image from Cloudinary:', error);
+            // Continue with deleting the item from JSON even if image deletion fails
+          } else {
+            console.log('Image deleted from Cloudinary:', result);
+          }
+        });
+      }
+
       pecas = pecas.filter(p => p.id !== parseInt(req.params.id));
       fs.writeFile('data/pecas.json', JSON.stringify(pecas, null, 2), (err) => {
         if (err) {
