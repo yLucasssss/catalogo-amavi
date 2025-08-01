@@ -1,8 +1,13 @@
 /* Estilos gerais */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #fdf9f5;
-  padding-top: 100px; /* Adiciona padding para o header fixo */
+  padding-top: 120px; /* Aumenta o padding para garantir que o conteúdo não seja sobreposto */
 }
 
 h1 {
