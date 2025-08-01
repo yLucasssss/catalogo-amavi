@@ -14,7 +14,7 @@ h1 {
   color: #e0a2a2;
   text-align: start; /* Alinha o título à esquerda */
   font-weight: bold;
-  /* margin-top: 2rem; Removido para ajustar o espaçamento */
+  margin-top: 1rem; /* Adiciona um pequeno espaçamento superior */
   margin-bottom: 1rem; /* Reduz a margem inferior do título */
 }
 
