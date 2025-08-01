@@ -14,7 +14,11 @@ const Peca = sequelize.define('Peca', {
   preco: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
-    defaultValue: 0.00 // Garante que o valor padrão seja 0.00
+    defaultValue: 0.00, // Garante que o valor padrão seja 0.00
+    get() {
+      const rawValue = this.getDataValue('preco');
+      return parseFloat(rawValue);
+    }
   },
   imagem: {
     type: DataTypes.STRING,
