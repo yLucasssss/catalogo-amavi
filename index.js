@@ -112,6 +112,7 @@ app.get('/admin', checkAuth, async (req, res) => {
     const { nome } = req.query;
     const where = nome ? { nome: { [Op.iLike]: `%${nome}%` } } : {};
     const pecas = await Peca.findAll({ where });
+    console.log('Pecas carregadas para admin:', pecas); // DIAGNÓSTICO
     res.render('admin', { pecas: pecas, filterName: nome });
   } catch (error) {
     console.error('Erro ao buscar peças para admin:', error);
