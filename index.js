@@ -112,7 +112,6 @@ app.get('/admin', checkAuth, async (req, res) => {
     const { nome } = req.query;
     const where = nome ? { nome: { [Op.iLike]: `%${nome}%` } } : {};
     const pecas = await Peca.findAll({ where });
-    console.log('Pecas carregadas para admin:', pecas); // DIAGNÓSTICO
     res.render('admin', { pecas: pecas, filterName: nome });
   } catch (error) {
     console.error('Erro ao buscar peças para admin:', error);
@@ -126,7 +125,6 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
-    console.log('req.body na rota nova-peca:', req.body); // DIAGNÓSTICO
     const { nome, valor, tipo, tamanho } = req.body;
 
     // Validação de entrada (agora após o multer processar req.body)
