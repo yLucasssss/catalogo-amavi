@@ -125,6 +125,7 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
+    console.log('req.body na rota nova-peca:', req.body); // DIAGNÓSTICO
     const { nome, preco, tipo, tamanho } = req.body;
 
     // Validação de entrada (agora após o multer processar req.body)
