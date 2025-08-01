@@ -22,7 +22,7 @@ h1 {
 /* Media query para o título em mobile */
 @media (max-width: 767.98px) {
     h1 {
-        font-size: 1.2rem; /* Tamanho menor para caber em uma linha */
+        font-size: 1rem; /* Tamanho ainda menor para caber em uma linha */
     }
 }
 
@@ -32,6 +32,10 @@ h1 {
     max-width: 250px; /* Limita a largura máxima para desktop */
     margin-left: 0; /* Garante alinhamento à esquerda */
     margin-right: auto; /* Garante alinhamento à esquerda */
+}
+
+.filter-select-container .form-label {
+    font-size: 0.9rem; /* Tamanho da fonte do rótulo */
 }
 
 .filter-select-container .form-select {
@@ -45,9 +49,12 @@ h1 {
     .filter-select-container {
         max-width: 100%; /* Ocupa a largura total em mobile */
     }
+    .filter-select-container .form-label {
+        font-size: 0.8rem; /* Tamanho menor para o rótulo em mobile */
+    }
     .filter-select-container .form-select {
-        font-size: 1rem; /* Tamanho padrão em mobile */
-        height: calc(2.25rem + 0.75rem + 2px); /* Altura padrão em mobile */
+        font-size: 0.8rem; /* Tamanho menor para o select em mobile */
+        height: calc(1.5rem + 0.75rem + 2px); /* Altura menor para o select em mobile */
     }
 }
 
