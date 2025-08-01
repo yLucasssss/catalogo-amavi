@@ -14,8 +14,34 @@ h1 {
   color: #e0a2a2;
   text-align: start; /* Alinha o título à esquerda */
   font-weight: bold;
-  margin-top: 1rem; /* Adiciona um pequeno espaçamento superior */
-  margin-bottom: 1rem; /* Reduz a margem inferior do título */
+  font-size: 1.8rem; /* Diminui o tamanho da fonte */
+  margin-top: 1rem; /* Mantém o pequeno espaçamento superior */
+  margin-bottom: 0.5rem; /* Diminui a margem inferior */
+}
+
+/* Estilo para o container do filtro */
+.filter-select-container {
+    width: 100%; /* Ocupa a largura total */
+    max-width: 250px; /* Limita a largura máxima para desktop */
+    margin-left: 0; /* Garante alinhamento à esquerda */
+    margin-right: auto; /* Garante alinhamento à esquerda */
+}
+
+.filter-select-container .form-select {
+    font-size: 0.9rem; /* Diminui o tamanho da fonte do select */
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem; /* Ajusta o padding para um tamanho menor */
+    height: calc(1.8rem + 0.75rem + 2px); /* Ajusta a altura do select */
+}
+
+/* Media queries para mobile */
+@media (max-width: 767.98px) {
+    .filter-select-container {
+        max-width: 100%; /* Ocupa a largura total em mobile */
+    }
+    .filter-select-container .form-select {
+        font-size: 1rem; /* Tamanho padrão em mobile */
+        height: calc(2.25rem + 0.75rem + 2px); /* Altura padrão em mobile */
+    }
 }
 
 /* Navbar */
