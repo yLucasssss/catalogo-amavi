@@ -9,7 +9,7 @@ h1 {
   color: #e0a2a2;
   text-align: start; /* Alinha o título à esquerda */
   font-weight: bold;
-  margin-top: 2rem; /* Adiciona margem superior para descolar do cabeçalho */
+  /* margin-top: 2rem; Removido para ajustar o espaçamento */
   margin-bottom: 1rem; /* Reduz a margem inferior do título */
 }
 
