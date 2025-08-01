@@ -7,7 +7,7 @@ html, body {
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #fdf9f5;
-  padding-top: 120px; /* Aumenta o padding para garantir que o conteúdo não seja sobreposto */
+  padding-top: 100px; /* Ajusta o padding para a altura do header */
 }
 
 h1 {
@@ -23,7 +23,11 @@ h1 {
   background-color: #e0a2a2;
   box-shadow: 0 2px 8px rgba(0,0,0,.1);
   padding: 10px 0;
-  position: relative; /* Para posicionar o ícone do Instagram */
+  position: fixed; /* Garante que o navbar fique fixo */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030; /* Garante que o navbar fique acima de outros elementos */
 }
 
 .navbar-brand {
