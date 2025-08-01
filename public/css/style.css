@@ -2,6 +2,7 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #fdf9f5;
+  padding-top: 100px; /* Adiciona padding para o header fixo */
 }
 
 h1 {
