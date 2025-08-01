@@ -17,6 +17,7 @@ const Peca = sequelize.define('Peca', {
     defaultValue: 0.00, // Garante que o valor padrão seja 0.00
     get() {
       const rawValue = this.getDataValue('preco');
+      console.log('Getter de preco - rawValue:', rawValue, 'typeof:', typeof rawValue); // DIAGNÓSTICO
       return parseFloat(rawValue);
     }
   },

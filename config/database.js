@@ -12,15 +12,6 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     },
     native: false, // Força o Sequelize a não usar o driver nativo do pg, permitindo typeCast
     typeCast: true // Habilita o type casting para converter tipos de banco de dados para tipos JS
-  },
-  define: {
-    // Adiciona um parser para tipos NUMERIC para garantir que sejam retornados como números
-    // Isso é crucial para evitar que valores decimais sejam retornados como strings
-    typeMapping: {
-      'NUMERIC': function(value) {
-        return parseFloat(value);
-      }
-    }
   }
 });
 
