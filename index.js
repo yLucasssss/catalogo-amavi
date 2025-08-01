@@ -126,20 +126,20 @@ app.get('/admin/pecas/nova', checkAuth, (req, res) => {
 app.post('/admin/pecas/nova', checkAuth, upload.single('imagem'), async (req, res) => {
   try {
     console.log('req.body na rota nova-peca:', req.body); // DIAGNÓSTICO
-    const { nome, preco, tipo, tamanho } = req.body;
+    const { nome, valor, tipo, tamanho } = req.body;
 
     // Validação de entrada (agora após o multer processar req.body)
     if (!nome || typeof nome !== 'string' || nome.trim() === '') {
       return res.status(400).send('O nome da peça é obrigatório e deve ser um texto válido.');
     }
-    if (!preco || typeof preco !== 'string' || preco.trim() === '') {
+    if (!valor || typeof valor !== 'string' || valor.trim() === '') {
       return res.status(400).send('O valor do preço é obrigatório e deve ser um texto válido.');
     }
     if (!req.file) {
       return res.status(400).send('A imagem é obrigatória.');
     }
 
-    const precoFormatado = preco.replace(',', '.'); // Substitui vírgula por ponto
+    const precoFormatado = valor.replace(',', '.'); // Substitui vírgula por ponto
     const parsedPreco = parseFloat(precoFormatado);
     if (isNaN(parsedPreco)) {
       return res.status(400).send('O valor do preço deve ser um número válido.');
